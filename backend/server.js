@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 import bookingRoutes from "./routes/bookingRoutes.js";
 
 dotenv.config();
@@ -9,7 +10,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// API routes
+// Connect MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.error("MongoDB Error:", err));
+
+// Routes
 app.use("/api", bookingRoutes);
 
 const PORT = process.env.PORT || 5000;

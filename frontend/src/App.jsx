@@ -7,6 +7,7 @@ import Music from './pages/Music';
 import Booking from './pages/Booking';
 import './index.css'
 import Footer from './components/Footer';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/music" element={<Music />} />
         <Route path="/booking" element={<Booking />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
       <Footer />
     </>

@@ -1,8 +1,9 @@
+// in bookingRoutes.js
 import express from "express";
-import { sendBookingEmail } from "../controllers/bookingController.js";
+import { getAllBookings, sendBookingEmail } from "../controllers/bookingController.js";
 
 const router = express.Router();
 
-router.post("/send-booking", sendBookingEmail);
-
+router.post("/booking", sendBookingEmail);
+router.get("/bookings", getAllBookings); 
 export default router;
