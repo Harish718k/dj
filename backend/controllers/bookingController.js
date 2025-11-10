@@ -66,3 +66,18 @@ export const getAllBookings = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch bookings" });
   }
 };
+
+export const deleteBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const booking = await Booking.findByIdAndDelete(id);
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    res.json({ success: true, message: "Booking deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error", error });
+  }
+};

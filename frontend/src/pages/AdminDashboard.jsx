@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  // ✅ Fetch Bookings
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -19,9 +21,29 @@ function AdminDashboard() {
     fetchBookings();
   }, []);
 
+  // ✅ Delete Booking Function
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this booking?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setBookings((prev) => prev.filter((b) => b._id !== id));
+      } else {
+        setError(data.message || "Failed to delete booking");
+      }
+    } catch (err) {
+      console.error("Error deleting booking:", err);
+      setError("Something went wrong while deleting");
+    }
+  };
+
   return (
-    <section className="min-h-screen bg-black text-white flex flex-col items-center py-16 px-6 relative">
-      {/* Header */}
+    <section className="min-h-screen bg-black text-white flex flex-col items-center py-24 px-6 relative">
       <div className="max-w-6xl w-full bg-zinc-900 rounded-2xl shadow-lg p-8">
         <h1 className="text-4xl md:text-5xl font-bold text-center text-red-500 mb-6">
           Admin Dashboard
@@ -30,7 +52,8 @@ function AdminDashboard() {
           View and manage all your DJ BEATZ bookings.
         </p>
 
-        {/* Loading Spinner */}
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
         {loading ? (
           <div className="flex justify-center py-10">
             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-600 border-opacity-80"></div>
@@ -49,6 +72,7 @@ function AdminDashboard() {
                   <th className="p-4 border-b border-zinc-700">Date</th>
                   <th className="p-4 border-b border-zinc-700">Event Type</th>
                   <th className="p-4 border-b border-zinc-700">Message</th>
+                  <th className="p-4 border-b border-zinc-700 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -66,6 +90,14 @@ function AdminDashboard() {
                     <td className="p-4 text-gray-400">{b.date}</td>
                     <td className="p-4 text-red-400 font-medium">{b.eventType}</td>
                     <td className="p-4 text-gray-400">{b.message}</td>
+                    <td className="p-4 text-center">
+                      <button
+                        onClick={() => handleDelete(b._id)}
+                        className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded-lg text-sm font-semibold transition"
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -74,7 +106,6 @@ function AdminDashboard() {
         )}
       </div>
 
-      {/* Background gradient glow */}
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-red-950/30 via-black to-black"></div>
     </section>
   );

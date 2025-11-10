@@ -8,6 +8,8 @@ import Booking from './pages/Booking';
 import './index.css'
 import Footer from './components/Footer';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
+import ProtectedRoute from './utils/ProtectedRoute';
 
 function App() {
   return (
@@ -18,7 +20,15 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/music" element={<Music />} />
         <Route path="/booking" element={<Booking />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
       <Footer />
     </>
