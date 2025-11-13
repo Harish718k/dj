@@ -1,7 +1,7 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaTimes } from "react-icons/fa";
 
-function MusicPlayer({ track, onClose }) {
+const MusicPlayer = forwardRef(({ track, onClose }, ref) => {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState(0.8);
@@ -10,7 +10,11 @@ function MusicPlayer({ track, onClose }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
 
-  // Load + auto play when track changes
+  // Expose audio element to parent (Music)
+  useImperativeHandle(ref, () => ({
+    getAudioElement: () => audioRef.current,
+  }));
+
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
@@ -24,8 +28,6 @@ function MusicPlayer({ track, onClose }) {
         }
       };
       playAudio();
-
-      // Cleanup
       return () => {
         audio.pause();
         setIsPlaying(false);
@@ -33,20 +35,16 @@ function MusicPlayer({ track, onClose }) {
     }
   }, [track]);
 
-  // Update progress bar dynamically
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-
     const updateProgress = () => {
       setCurrentTime(audio.currentTime);
       setDuration(audio.duration);
       setProgress((audio.currentTime / audio.duration) * 100 || 0);
     };
-
     audio.addEventListener("timeupdate", updateProgress);
     audio.addEventListener("loadedmetadata", updateProgress);
-
     return () => {
       audio.removeEventListener("timeupdate", updateProgress);
       audio.removeEventListener("loadedmetadata", updateProgress);
@@ -56,10 +54,8 @@ function MusicPlayer({ track, onClose }) {
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
-
     if (isPlaying) audio.pause();
     else audio.play();
-
     setIsPlaying(!isPlaying);
   };
 
@@ -85,19 +81,15 @@ function MusicPlayer({ track, onClose }) {
     setProgress(e.target.value);
   };
 
-  // Format time mm:ss
   const formatTime = (time) => {
     if (isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60)
-      .toString()
-      .padStart(2, "0");
+    const seconds = Math.floor(time % 60).toString().padStart(2, "0");
     return `${minutes}:${seconds}`;
   };
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] md:w-[600px] bg-gradient-to-r from-red-800 to-black border border-red-700 shadow-lg rounded-2xl px-5 py-4 flex flex-col gap-3 text-white z-50 backdrop-blur-sm">
-      {/* Top section - Info + controls */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <img
@@ -110,16 +102,11 @@ function MusicPlayer({ track, onClose }) {
             <p className="text-sm text-gray-300">{track?.artist}</p>
           </div>
         </div>
-
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-red-500 transition"
-        >
+        <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition">
           <FaTimes size={18} />
         </button>
       </div>
 
-      {/* Middle - Progress bar */}
       <div className="flex items-center gap-2 text-xs text-gray-400">
         <span>{formatTime(currentTime)}</span>
         <input
@@ -133,20 +120,12 @@ function MusicPlayer({ track, onClose }) {
         <span>{formatTime(duration)}</span>
       </div>
 
-      {/* Bottom - Playback + Volume */}
       <div className="flex items-center justify-between">
-        <button
-          onClick={togglePlay}
-          className="bg-white text-black rounded-full p-3 hover:scale-110 transition"
-        >
+        <button onClick={togglePlay} className="bg-white text-black rounded-full p-3 hover:scale-110 transition">
           {isPlaying ? <FaPause size={16} /> : <FaPlay size={16} />}
         </button>
-
         <div className="flex items-center gap-3">
-          <button
-            onClick={toggleMute}
-            className="text-gray-300 hover:text-red-500 transition"
-          >
+          <button onClick={toggleMute} className="text-gray-300 hover:text-red-500 transition">
             {isMuted ? <FaVolumeMute size={18} /> : <FaVolumeUp size={18} />}
           </button>
           <input
@@ -161,10 +140,9 @@ function MusicPlayer({ track, onClose }) {
         </div>
       </div>
 
-      {/* Audio element */}
       <audio ref={audioRef} src={track?.audioUrl} />
     </div>
   );
-}
+});
 
 export default MusicPlayer;
